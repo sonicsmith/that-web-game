@@ -1,29 +1,29 @@
-import { useEffect, useRef } from "react";
+import { RefObject, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { createNoise2D } from "simplex-noise";
+import alea from "alea";
 
 const PLANE_RESOLUTION = 100;
 const NOISE_LEVEL = 0.2;
 const HEIGHT = 0.8;
 
-const noise = createNoise2D();
+const prng = alea("seed");
+const noise = createNoise2D(prng);
 
 const generateGround = ({
   mesh,
-  offsetX,
-  offsetY,
+  groundCoordinates,
   size,
 }: {
   mesh: THREE.Mesh<THREE.BufferGeometry>;
-  offsetX: number;
-  offsetY: number;
+  groundCoordinates: THREE.Vector2;
   size: number;
 }) => {
   const { geometry } = mesh;
   const { position } = geometry.attributes;
   for (let index = 0; index < position.count; index++) {
-    const x = position.getX(index) + offsetX * size;
-    const y = position.getY(index) + offsetY * size;
+    const x = position.getX(index) + groundCoordinates.x * size;
+    const y = position.getY(index) + groundCoordinates.y * size;
     const amplitude = noise(x * NOISE_LEVEL, y * NOISE_LEVEL);
     position.array[index * 3 + 2] = amplitude * HEIGHT;
   }
@@ -42,25 +42,31 @@ const generateGround = ({
   geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
 };
 
-export const GroundSection = ({
-  offsetX,
-  offsetY,
-  size,
-}: {
-  offsetX: number;
-  offsetY: number;
+interface GroundSectionProps {
   size: number;
-}) => {
-  const mesh = useRef<THREE.Mesh<THREE.BufferGeometry>>(null);
+  offset: THREE.Vector2;
+  worldCoordinates: THREE.Vector2;
+}
+
+export const GroundSection = ({
+  size,
+  offset,
+  worldCoordinates,
+}: GroundSectionProps) => {
+  const meshRef = useRef<THREE.Mesh<THREE.BufferGeometry>>(null);
 
   useEffect(() => {
-    if (mesh.current) {
-      generateGround({ mesh: mesh.current, offsetX, offsetY, size });
+    if (meshRef.current) {
+      const groundCoordinates = new THREE.Vector2(
+        worldCoordinates.x + offset.x,
+        worldCoordinates.y + offset.y
+      );
+      generateGround({ mesh: meshRef.current, groundCoordinates, size });
     }
   }, []);
-  console.log("Generating ground section at", offsetX);
+
   return (
-    <mesh ref={mesh} position={[offsetX * size, offsetY * size, 0]}>
+    <mesh ref={meshRef} position={[offset.x * size, offset.y * size, 0]}>
       <planeGeometry args={[size, size, PLANE_RESOLUTION, PLANE_RESOLUTION]} />
       <meshStandardMaterial side={THREE.DoubleSide} flatShading vertexColors />
     </mesh>

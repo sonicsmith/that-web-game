@@ -1,11 +1,14 @@
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useFrame } from "@react-three/fiber";
 import { Ground } from "./Ground";
 import { Player } from "./Player";
+import { useKeyboardControls } from "@react-three/drei";
+import { useRef } from "react";
+import { Vector3 } from "three";
 
 export function GameView() {
   return (
     <div className="w-full h-screen">
-      <Canvas>
+      <Canvas camera={{ position: [0, 0, 100] }}>
         {/* <ambientLight intensity={0.5} /> */}
         <directionalLight position={[5, 5, 5]} intensity={1} />
         <directionalLight position={[-5, -5, -5]} intensity={0.5} />
