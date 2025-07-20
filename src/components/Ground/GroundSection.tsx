@@ -6,7 +6,7 @@ import { useFrame } from "@react-three/fiber";
 import { useKeyboardControls } from "@react-three/drei";
 
 const PLANE_RESOLUTION = 100;
-const NOISE_LEVEL = 0.08;
+const NOISE_LEVEL = 0.05;
 const HEIGHT = 2;
 
 const prng = alea("seed");

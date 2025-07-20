@@ -2,6 +2,7 @@
 
 import { GameView } from "@/components/GameView";
 import { KeyboardControls, KeyboardControlsEntry } from "@react-three/drei";
+import { Canvas } from "@react-three/fiber";
 // import dynamic from "next/dynamic";
 // const GameView = dynamic(() => import("@/components/GameView"), { ssr: false });
 import { Suspense, useMemo } from "react";
@@ -21,7 +22,11 @@ export default function Home() {
             []
           )}
         >
-          <GameView />
+          <div className="w-full h-screen">
+            <Canvas>
+              <GameView />
+            </Canvas>
+          </div>
         </KeyboardControls>
       </Suspense>
     </div>
