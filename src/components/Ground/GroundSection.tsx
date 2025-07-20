@@ -1,11 +1,12 @@
-import { RefObject, useEffect, useRef } from "react";
+import { RefObject, useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { createNoise2D } from "simplex-noise";
 import alea from "alea";
+import { useFrame } from "@react-three/fiber";
 
 const PLANE_RESOLUTION = 100;
 const NOISE_LEVEL = 0.2;
-const HEIGHT = 0.8;
+const HEIGHT = 1;
 
 const prng = alea("seed");
 const noise = createNoise2D(prng);
@@ -13,17 +14,15 @@ const noise = createNoise2D(prng);
 const generateGround = ({
   mesh,
   groundCoordinates,
-  size,
 }: {
   mesh: THREE.Mesh<THREE.BufferGeometry>;
   groundCoordinates: THREE.Vector2;
-  size: number;
 }) => {
   const { geometry } = mesh;
   const { position } = geometry.attributes;
   for (let index = 0; index < position.count; index++) {
-    const x = position.getX(index) + groundCoordinates.x * size;
-    const y = position.getY(index) + groundCoordinates.y * size;
+    const x = position.getX(index) + groundCoordinates.x;
+    const y = position.getY(index) + groundCoordinates.y;
     const amplitude = noise(x * NOISE_LEVEL, y * NOISE_LEVEL);
     position.array[index * 3 + 2] = amplitude * HEIGHT;
   }
@@ -44,29 +43,40 @@ const generateGround = ({
 
 interface GroundSectionProps {
   size: number;
-  offset: THREE.Vector2;
-  worldCoordinates: THREE.Vector2;
+  sectionPositionsRef: RefObject<THREE.Vector2[]>;
+  index: number;
 }
 
 export const GroundSection = ({
   size,
-  offset,
-  worldCoordinates,
+  sectionPositionsRef,
+  index,
 }: GroundSectionProps) => {
-  const meshRef = useRef<THREE.Mesh<THREE.BufferGeometry>>(null);
+  const ref = useRef<THREE.Mesh<THREE.BufferGeometry>>(null);
 
   useEffect(() => {
-    if (meshRef.current) {
-      const groundCoordinates = new THREE.Vector2(
-        worldCoordinates.x + offset.x,
-        worldCoordinates.y + offset.y
-      );
-      generateGround({ mesh: meshRef.current, groundCoordinates, size });
+    if (ref.current) {
+      const groundCoordinates = sectionPositionsRef.current[index];
+      generateGround({ mesh: ref.current, groundCoordinates });
     }
   }, []);
 
+  useFrame(() => {
+    if (ref.current) {
+      ref.current.position.x = sectionPositionsRef.current[index].x;
+      ref.current.position.y = sectionPositionsRef.current[index].y;
+    }
+  });
+
   return (
-    <mesh ref={meshRef} position={[offset.x * size, offset.y * size, 0]}>
+    <mesh
+      ref={ref}
+      position={[
+        sectionPositionsRef.current[index].x,
+        sectionPositionsRef.current[index].y,
+        0,
+      ]}
+    >
       <planeGeometry args={[size, size, PLANE_RESOLUTION, PLANE_RESOLUTION]} />
       <meshStandardMaterial side={THREE.DoubleSide} flatShading vertexColors />
     </mesh>
