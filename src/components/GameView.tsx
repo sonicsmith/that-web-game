@@ -1,9 +1,6 @@
-import { Canvas, useFrame } from "@react-three/fiber";
+import { Canvas } from "@react-three/fiber";
 import { Ground } from "./Ground";
 import { Player } from "./Player";
-import { useKeyboardControls } from "@react-three/drei";
-import { useRef } from "react";
-import { Vector3 } from "three";
 
 export function GameView() {
   return (
