@@ -8,6 +8,8 @@ import { useKeyboardControls } from "@react-three/drei";
 const PLANE_RESOLUTION = 100;
 const NOISE_LEVEL = 0.05;
 const HEIGHT = 2;
+const GROUND_COLOR = { r: 255 / 255, g: 176 / 255, b: 110 / 255 };
+const GRASS_COLOR = { r: 71 / 255, g: 196 / 255, b: 76 / 255 };
 
 const prng = alea("seed");
 const noise = createNoise2D(prng);
@@ -37,8 +39,20 @@ const regenerateTerrain = ({
 
   for (let i = 0; i < posAttr.count; i += 3) {
     for (let j = 0; j < 3; j++) {
-      const color = 0.5; //(position.array[i * 3 + 2] + 1) / 2;
-      colors.push(color, color, color);
+      const color = (position.array[i * 3 + 2] + 1) / 2 + 0.6;
+      if (color > 0.9) {
+        colors.push(
+          color * GRASS_COLOR.r,
+          color * GRASS_COLOR.g,
+          color * GRASS_COLOR.b
+        );
+      } else {
+        colors.push(
+          color * GROUND_COLOR.r,
+          color * GROUND_COLOR.g,
+          color * GROUND_COLOR.b
+        );
+      }
     }
   }
   geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));

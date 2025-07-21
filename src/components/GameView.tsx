@@ -15,6 +15,7 @@ export function GameView() {
     <>
       <directionalLight position={[5, 5, 5]} intensity={1} />
       <directionalLight position={[-5, -5, -5]} intensity={0.5} />
+      <ambientLight intensity={0.5} />
       <Ground />
       <Player />
     </>

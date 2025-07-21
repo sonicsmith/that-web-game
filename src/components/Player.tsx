@@ -1,10 +1,33 @@
-import React, { useRef } from "react";
-import { useGLTF, useAnimations } from "@react-three/drei";
+import React, { useEffect, useRef, useState } from "react";
+import { useGLTF, useAnimations, useKeyboardControls } from "@react-three/drei";
+import { useFrame } from "@react-three/fiber";
 
 export function Player() {
   const group = useRef(null);
   const { nodes, materials, animations } = useGLTF("/models/player.glb");
   const { actions } = useAnimations(animations, group);
+
+  useEffect(() => {
+    if (actions) {
+      actions.idle?.play();
+    }
+  }, []);
+
+  const [, get] = useKeyboardControls();
+
+  useFrame(() => {
+    const { forward, backward, left, right } = get();
+    const isMoving = forward || backward || left || right;
+    let nextAnimation = "idle";
+    if (isMoving) {
+      nextAnimation = "walk";
+    }
+    if (!actions[nextAnimation]?.isRunning()) {
+      const currentAnimation = nextAnimation === "idle" ? "walk" : "idle";
+      actions[currentAnimation]?.fadeOut(0.01);
+      actions[nextAnimation]?.reset().fadeIn(0.01).play();
+    }
+  });
 
   return (
     <group
