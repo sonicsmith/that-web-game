@@ -1,10 +1,13 @@
 "use client";
 
-import { GameView } from "@/components/GameView";
+// import { GameView } from "@/components/GameView";
 import { KeyboardControls, KeyboardControlsEntry } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-// import dynamic from "next/dynamic";
-// const GameView = dynamic(() => import("@/components/GameView"), { ssr: false });
+import dynamic from "next/dynamic";
+const GameView = dynamic(
+  () => import("@/components/GameView").then(({ GameView }) => GameView),
+  { ssr: false }
+);
 import { Suspense, useMemo } from "react";
 
 export default function Home() {
@@ -22,8 +25,8 @@ export default function Home() {
             []
           )}
         >
-          <div className="w-full h-screen">
-            <Canvas>
+          <div className="w-full h-screen bg-sky-600">
+            <Canvas shadows>
               <GameView />
             </Canvas>
           </div>

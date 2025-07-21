@@ -1,9 +1,14 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { RefObject, useEffect, useRef, useState } from "react";
 import { useGLTF, useAnimations, useKeyboardControls } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
+import { Group, Object3DEventMap } from "three";
 
-export function Player() {
-  const group = useRef(null);
+export function Player({
+  groundHeightRef,
+}: {
+  groundHeightRef: RefObject<number>;
+}) {
+  const group = useRef<Group<Object3DEventMap>>(null);
   const { nodes, materials, animations } = useGLTF("/models/player.glb");
   const { actions } = useAnimations(animations, group);
 
@@ -27,14 +32,19 @@ export function Player() {
       actions[currentAnimation]?.fadeOut(0.01);
       actions[nextAnimation]?.reset().fadeIn(0.01).play();
     }
+    if (!group.current) return;
+    if (groundHeightRef.current) {
+      group.current.position.z = groundHeightRef.current;
+    }
   });
 
   return (
     <group
       ref={group}
       dispose={null}
-      position={[0, 0, 5]}
+      position={[0, 0, 2]}
       rotation={[Math.PI / 2, Math.PI, 0]}
+      castShadow
     >
       <group name="player">
         <group name="player_1">

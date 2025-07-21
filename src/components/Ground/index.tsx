@@ -1,5 +1,7 @@
+import { RigidBody } from "@react-three/rapier";
 import { GroundSection } from "./GroundSection";
 import * as THREE from "three";
+import { RefObject } from "react";
 
 const SECTION_SIZE = 20;
 const SECTION_POSITIONS: THREE.Vector2[] = [];
@@ -14,7 +16,11 @@ for (let x = -HALF_GRID_SIZE; x <= HALF_GRID_SIZE; x++) {
   }
 }
 
-export const Ground = () => {
+export const Ground = ({
+  groundHeightRef,
+}: {
+  groundHeightRef: RefObject<number>;
+}) => {
   return (
     <>
       {SECTION_POSITIONS.map((coordinates, index) => (
@@ -23,6 +29,7 @@ export const Ground = () => {
           sectionPosition={SECTION_POSITIONS[index]}
           size={SECTION_SIZE}
           boundsRadius={HALF_GRID_SIZE}
+          groundHeightRef={groundHeightRef}
         />
       ))}
     </>
