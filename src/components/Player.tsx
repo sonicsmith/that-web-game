@@ -44,7 +44,6 @@ export function Player({
       dispose={null}
       position={[0, 0, 2]}
       rotation={[Math.PI / 2, Math.PI, 0]}
-      castShadow
     >
       <group name="player">
         <group name="player_1">
@@ -54,12 +53,14 @@ export function Player({
             geometry={(nodes["body-mesh"] as any).geometry}
             material={materials.colormap}
             skeleton={(nodes["body-mesh"] as any).skeleton}
+            castShadow
           />
           <skinnedMesh
             name="head-mesh"
             geometry={(nodes["head-mesh"] as any).geometry}
             material={materials.colormap}
             skeleton={(nodes["head-mesh"] as any).skeleton}
+            castShadow
           />
         </group>
       </group>

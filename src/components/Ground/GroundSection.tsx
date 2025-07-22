@@ -48,19 +48,14 @@ const regenerateTerrain = ({
 
 const getHeightAtPlayer = (mesh: THREE.Mesh) => {
   mesh.updateMatrixWorld(true);
-
   const raycaster = new THREE.Raycaster();
   const rayOrigin = new THREE.Vector3(0, 0, 10);
   const rayDirection = new THREE.Vector3(0, 0, -1);
-
   raycaster.set(rayOrigin, rayDirection);
-
   const intersects = raycaster.intersectObject(mesh, true);
-
   if (intersects.length > 0) {
     return intersects[0].point.z;
   }
-
   return null;
 };
 
@@ -93,7 +88,7 @@ export const GroundSection = ({
     });
   }, []);
 
-  useFrame(() => {
+  useFrame(({ camera }) => {
     if (!meshRef.current) return;
     const { forward, backward, left, right } = get();
     const movement = new THREE.Vector3(0, 0, 0);
@@ -138,13 +133,15 @@ export const GroundSection = ({
     const height = getHeightAtPlayer(meshRef.current);
     if (height !== null) {
       groundHeightRef.current = height;
+      camera.position.set(0, -2, height + 1.5);
+      camera.lookAt(0, 5, height);
     }
   });
 
   return (
-    <mesh ref={meshRef} receiveShadow>
+    <mesh ref={meshRef} castShadow receiveShadow>
       <planeGeometry args={[size, size, PLANE_RESOLUTION, PLANE_RESOLUTION]} />
-      <meshStandardMaterial side={THREE.DoubleSide} flatShading vertexColors />
+      <meshStandardMaterial vertexColors flatShading />
     </mesh>
   );
 };
