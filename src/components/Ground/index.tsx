@@ -1,4 +1,3 @@
-import { RigidBody } from "@react-three/rapier";
 import { GroundSection } from "./GroundSection";
 import * as THREE from "three";
 import { RefObject } from "react";
@@ -17,9 +16,9 @@ for (let x = -HALF_GRID_SIZE; x <= HALF_GRID_SIZE; x++) {
 }
 
 export const Ground = ({
-  groundHeightRef,
+  playerRef,
 }: {
-  groundHeightRef: RefObject<number>;
+  playerRef: RefObject<THREE.Group<THREE.Object3DEventMap> | null>;
 }) => {
   return (
     <>
@@ -29,7 +28,7 @@ export const Ground = ({
           sectionPosition={SECTION_POSITIONS[index]}
           size={SECTION_SIZE}
           boundsRadius={HALF_GRID_SIZE}
-          groundHeightRef={groundHeightRef}
+          playerRef={playerRef}
         />
       ))}
     </>

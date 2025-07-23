@@ -1,16 +1,20 @@
-import React, { RefObject, useEffect, useRef, useState } from "react";
-import { useGLTF, useAnimations, useKeyboardControls } from "@react-three/drei";
+import React, { RefObject, useEffect } from "react";
+import {
+  useGLTF,
+  useAnimations,
+  useKeyboardControls,
+  PerspectiveCamera,
+} from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { Group, Object3DEventMap } from "three";
 
 export function Player({
-  groundHeightRef,
+  playerRef,
 }: {
-  groundHeightRef: RefObject<number>;
+  playerRef: RefObject<Group<Object3DEventMap> | null>;
 }) {
-  const group = useRef<Group<Object3DEventMap>>(null);
   const { nodes, materials, animations } = useGLTF("/models/player.glb");
-  const { actions } = useAnimations(animations, group);
+  const { actions } = useAnimations(animations, playerRef);
 
   useEffect(() => {
     if (actions) {
@@ -22,9 +26,9 @@ export function Player({
 
   useFrame(() => {
     const { forward, backward, left, right } = get();
-    const isMoving = forward || backward || left || right;
+
     let nextAnimation = "idle";
-    if (isMoving) {
+    if (forward || backward || left || right) {
       nextAnimation = "walk";
     }
     if (!actions[nextAnimation]?.isRunning()) {
@@ -32,20 +36,20 @@ export function Player({
       actions[currentAnimation]?.fadeOut(0.01);
       actions[nextAnimation]?.reset().fadeIn(0.01).play();
     }
-    if (!group.current) return;
-    if (groundHeightRef.current) {
-      group.current.position.z = groundHeightRef.current;
+    if (!playerRef.current) return;
+    const player = playerRef.current;
+    // Move Player to top of terrain
+    if (left) {
+      player.rotateZ(0.05);
+    }
+    if (right) {
+      player.rotateZ(-0.05);
     }
   });
 
   return (
-    <group
-      ref={group}
-      dispose={null}
-      position={[0, 0, 2]}
-      rotation={[Math.PI / 2, Math.PI, 0]}
-    >
-      <group name="player">
+    <group ref={playerRef} dispose={null} position={[0, 0, 0]}>
+      <group name="player" rotation={[Math.PI / 2, Math.PI, 0]}>
         <group name="player_1">
           <primitive object={nodes.root} />
           <skinnedMesh
@@ -64,6 +68,11 @@ export function Player({
           />
         </group>
       </group>
+      <PerspectiveCamera
+        makeDefault
+        position={[0, -4, 1]}
+        rotation={[Math.PI / 2, 0, 0]}
+      />
     </group>
   );
 }

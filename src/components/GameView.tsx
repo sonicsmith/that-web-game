@@ -3,9 +3,10 @@ import { Ground } from "./Ground";
 import { Player } from "./Player";
 import { useEffect, useRef } from "react";
 import { OrbitControls } from "@react-three/drei";
+import { Group, Object3DEventMap } from "three";
 
 export function GameView() {
-  const groundHeightRef = useRef(0);
+  const playerRef = useRef<Group<Object3DEventMap>>(null);
 
   return (
     <>
@@ -13,8 +14,8 @@ export function GameView() {
       <directionalLight position={[5, 0, 15]} intensity={0.3} castShadow />
       <directionalLight position={[0, 2, 4]} intensity={0.1} />
       <ambientLight intensity={0.6} />
-      <Ground groundHeightRef={groundHeightRef} />
-      <Player groundHeightRef={groundHeightRef} />
+      <Ground playerRef={playerRef} />
+      <Player playerRef={playerRef} />
     </>
   );
 }

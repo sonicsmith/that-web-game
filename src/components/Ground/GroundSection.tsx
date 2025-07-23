@@ -4,6 +4,7 @@ import { createNoise2D } from "simplex-noise";
 import alea from "alea";
 import { useFrame } from "@react-three/fiber";
 import { useKeyboardControls } from "@react-three/drei";
+import { getHeightWorldPosition } from "@/utils/player";
 
 const PLANE_RESOLUTION = 50;
 const NOISE_LEVEL = 0.05;
@@ -46,31 +47,18 @@ const regenerateTerrain = ({
   geometry.setAttribute("color", new THREE.Float32BufferAttribute(colors, 3));
 };
 
-const getHeightAtPlayer = (mesh: THREE.Mesh) => {
-  mesh.updateMatrixWorld(true);
-  const raycaster = new THREE.Raycaster();
-  const rayOrigin = new THREE.Vector3(0, 0, 10);
-  const rayDirection = new THREE.Vector3(0, 0, -1);
-  raycaster.set(rayOrigin, rayDirection);
-  const intersects = raycaster.intersectObject(mesh, true);
-  if (intersects.length > 0) {
-    return intersects[0].point.z;
-  }
-  return null;
-};
-
 interface GroundSectionProps {
   size: number;
   boundsRadius: number;
   sectionPosition: THREE.Vector2;
-  groundHeightRef: RefObject<number>;
+  playerRef: RefObject<THREE.Group<THREE.Object3DEventMap> | null>;
 }
 
 export const GroundSection = ({
   size,
   boundsRadius,
   sectionPosition,
-  groundHeightRef,
+  playerRef,
 }: GroundSectionProps) => {
   const meshRef = useRef<THREE.Mesh<THREE.BufferGeometry>>(null);
   const worldPositionRef = useRef(new THREE.Vector2(0, 0));
@@ -88,16 +76,17 @@ export const GroundSection = ({
     });
   }, []);
 
-  useFrame(({ camera }) => {
-    if (!meshRef.current) return;
-    const { forward, backward, left, right } = get();
+  useFrame(() => {
+    if (!meshRef.current || !playerRef.current) return;
+    const { forward, backward } = get();
     const movement = new THREE.Vector3(0, 0, 0);
     if (forward) movement.y -= SPEED;
     if (backward) movement.y += SPEED;
-    if (left) movement.x += SPEED;
-    if (right) movement.x -= SPEED;
     // Return if no movement
     if (!movement.length()) return;
+
+    // if there is movement, we need to make it match the rotation of our player
+
     // Work out new position
     const newPosition = meshRef.current.position.clone().add(movement);
     const worldSectionOffsetUpdate = new THREE.Vector2(0, 0);
@@ -130,11 +119,12 @@ export const GroundSection = ({
       });
     }
     // Work out player height
-    const height = getHeightAtPlayer(meshRef.current);
+    const height = getHeightWorldPosition({
+      mesh: meshRef.current,
+      worldPosition: new THREE.Vector2(0, 0),
+    });
     if (height !== null) {
-      groundHeightRef.current = height;
-      camera.position.set(0, -2, height + 1.5);
-      camera.lookAt(0, 5, height);
+      playerRef.current.position.z = height;
     }
   });
 
