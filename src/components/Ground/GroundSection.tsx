@@ -84,8 +84,8 @@ export const GroundSection = ({
     if (backward) movement.y += SPEED;
     // Return if no movement
     if (!movement.length()) return;
-
-    // if there is movement, we need to make it match the rotation of our player
+    const axis = new THREE.Vector3(0, 0, 1); // Z-axis
+    movement.applyAxisAngle(axis, playerRef.current.rotation.z);
 
     // Work out new position
     const newPosition = meshRef.current.position.clone().add(movement);
