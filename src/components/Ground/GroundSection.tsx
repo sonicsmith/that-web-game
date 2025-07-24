@@ -4,7 +4,7 @@ import { createNoise2D } from "simplex-noise";
 import alea from "alea";
 import { useFrame } from "@react-three/fiber";
 import { useKeyboardControls } from "@react-three/drei";
-import { getHeightWorldPosition } from "@/utils/player";
+import { getHeightWorldPosition } from "@/utils/ground";
 
 const PLANE_RESOLUTION = 50;
 const NOISE_LEVEL = 0.05;
@@ -76,9 +76,28 @@ export const GroundSection = ({
     });
   }, []);
 
-  useFrame(() => {
+  useFrame(({ camera }) => {
     if (!meshRef.current || !playerRef.current) return;
-    const { forward, backward } = get();
+    const { forward, backward, left, right } = get();
+    // No player movement
+    if (!forward && !backward && !left && !right) {
+      return;
+    }
+
+    const cameraPosition3D = new THREE.Vector3();
+    camera.getWorldPosition(cameraPosition3D);
+    const cameraPosition = new THREE.Vector2(
+      cameraPosition3D.x,
+      cameraPosition3D.y
+    );
+    const cameraHeight = getHeightWorldPosition({
+      mesh: meshRef.current,
+      worldPosition: cameraPosition, // Player Position
+    });
+    if (cameraHeight !== null) {
+      camera.position.z = cameraHeight + 1.5;
+    }
+
     const movement = new THREE.Vector3(0, 0, 0);
     if (forward) movement.y -= SPEED;
     if (backward) movement.y += SPEED;
@@ -118,13 +137,13 @@ export const GroundSection = ({
         worldPosition: worldPositionRef.current,
       });
     }
-    // Work out player height
-    const height = getHeightWorldPosition({
+    // Work out terrain height for player
+    const playerHeight = getHeightWorldPosition({
       mesh: meshRef.current,
-      worldPosition: new THREE.Vector2(0, 0),
+      worldPosition: new THREE.Vector2(0, 0), // Player Position
     });
-    if (height !== null) {
-      playerRef.current.position.z = height;
+    if (playerHeight !== null) {
+      playerRef.current.position.z = playerHeight;
     }
   });
 
