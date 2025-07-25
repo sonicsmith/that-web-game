@@ -6,7 +6,19 @@ import {
   PerspectiveCamera,
 } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
-import { Group, Object3DEventMap } from "three";
+import {
+  BufferGeometry,
+  BufferGeometryEventMap,
+  Group,
+  NormalBufferAttributes,
+  Object3DEventMap,
+  Skeleton,
+} from "three";
+
+interface Node {
+  geometry: BufferGeometry<NormalBufferAttributes, BufferGeometryEventMap>;
+  skeleton: Skeleton | Readonly<Skeleton | undefined>;
+}
 
 export function Player({
   playerRef,
@@ -20,7 +32,7 @@ export function Player({
     if (actions) {
       actions.idle?.play();
     }
-  }, []);
+  }, [actions]);
 
   const [, get] = useKeyboardControls();
 
@@ -47,6 +59,9 @@ export function Player({
     }
   });
 
+  const bodyMeshNode = nodes["body-mesh"] as unknown as Node;
+  const headMeshNode = nodes["head-mesh"] as unknown as Node;
+
   return (
     <group ref={playerRef} dispose={null} position={[0, 0, 0]}>
       <group name="player" rotation={[Math.PI / 2, Math.PI, 0]}>
@@ -54,16 +69,16 @@ export function Player({
           <primitive object={nodes.root} />
           <skinnedMesh
             name="body-mesh"
-            geometry={(nodes["body-mesh"] as any).geometry}
+            geometry={bodyMeshNode.geometry}
             material={materials.colormap}
-            skeleton={(nodes["body-mesh"] as any).skeleton}
+            skeleton={bodyMeshNode.skeleton}
             castShadow
           />
           <skinnedMesh
             name="head-mesh"
-            geometry={(nodes["head-mesh"] as any).geometry}
+            geometry={headMeshNode.geometry}
             material={materials.colormap}
-            skeleton={(nodes["head-mesh"] as any).skeleton}
+            skeleton={headMeshNode.skeleton}
             castShadow
           />
         </group>

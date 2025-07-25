@@ -1,4 +1,4 @@
-import { RefObject, useEffect, useRef, useState } from "react";
+import { RefObject, useEffect, useRef } from "react";
 import * as THREE from "three";
 import { createNoise2D } from "simplex-noise";
 import alea from "alea";
@@ -84,7 +84,7 @@ export const GroundSection = ({
       mesh: meshRef.current,
       worldPosition: sectionPosition,
     });
-  }, []);
+  }, [sectionPosition]);
 
   useFrame(({ camera }) => {
     if (!meshRef.current || !playerRef.current) return;
