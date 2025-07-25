@@ -13,7 +13,7 @@ export function Player({
 }: {
   playerRef: RefObject<Group<Object3DEventMap> | null>;
 }) {
-  const { nodes, materials, animations } = useGLTF("/models/player.glb");
+  const { nodes, materials, animations } = useGLTF("/models/player/model.glb");
   const { actions } = useAnimations(animations, playerRef);
 
   useEffect(() => {
@@ -72,9 +72,10 @@ export function Player({
         makeDefault
         position={[0, -4, 1]}
         rotation={[Math.PI / 2, 0, 0]}
+        up={[0, 0, 1]}
       />
     </group>
   );
 }
 
-useGLTF.preload("/models/player.glb");
+useGLTF.preload("/models/player/model.glb");

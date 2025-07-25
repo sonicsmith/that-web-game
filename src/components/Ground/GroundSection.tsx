@@ -3,7 +3,7 @@ import * as THREE from "three";
 import { createNoise2D } from "simplex-noise";
 import alea from "alea";
 import { useFrame } from "@react-three/fiber";
-import { useKeyboardControls } from "@react-three/drei";
+import { useKeyboardControls, useTexture } from "@react-three/drei";
 import { getHeightWorldPosition } from "@/utils/ground";
 
 const PLANE_RESOLUTION = 50;
@@ -54,6 +54,8 @@ interface GroundSectionProps {
   playerRef: RefObject<THREE.Group<THREE.Object3DEventMap> | null>;
 }
 
+const TEXTURE_NAME = "textures/coast_sand_rocks_02";
+
 export const GroundSection = ({
   size,
   boundsRadius,
@@ -62,6 +64,14 @@ export const GroundSection = ({
 }: GroundSectionProps) => {
   const meshRef = useRef<THREE.Mesh<THREE.BufferGeometry>>(null);
   const worldPositionRef = useRef(new THREE.Vector2(0, 0));
+
+  const textureProps = useTexture({
+    map: `${TEXTURE_NAME}_diff_1k.jpg`,
+    // displacementMap: `${TEXTURE_NAME}_disp_1k.jpg`,
+    normalMap: `${TEXTURE_NAME}_nor_gl_1k.jpg`,
+    roughnessMap: `${TEXTURE_NAME}_rough_1k.jpg`,
+    aoMap: `${TEXTURE_NAME}_ao_1k.jpg`,
+  });
 
   const [, get] = useKeyboardControls();
 
@@ -95,7 +105,8 @@ export const GroundSection = ({
       worldPosition: cameraPosition, // Player Position
     });
     if (cameraHeight !== null) {
-      camera.position.z = cameraHeight + 1.5;
+      camera.position.z = cameraHeight + 2;
+      camera.lookAt(playerRef.current.position);
     }
 
     const movement = new THREE.Vector3(0, 0, 0);
@@ -150,7 +161,7 @@ export const GroundSection = ({
   return (
     <mesh ref={meshRef} castShadow receiveShadow>
       <planeGeometry args={[size, size, PLANE_RESOLUTION, PLANE_RESOLUTION]} />
-      <meshStandardMaterial vertexColors flatShading />
+      <meshStandardMaterial vertexColors flatShading {...textureProps} />
     </mesh>
   );
 };
